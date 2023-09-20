@@ -1,0 +1,9 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: conversao-temperatura-service
+spec:
+  selector:
+    app: conversao-temperatura
+  ports:
+    - port: 8080 # Default port for image

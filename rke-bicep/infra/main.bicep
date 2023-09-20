@@ -1,9 +1,8 @@
 @description('Location for all resources.')
 param location string = resourceGroup().location
 
-@description('Node password.')
-@secure()
-param adminPassword string
+@description('Node ssh key.')
+param sshKey string = loadTextContent('../../../.ssh/id_rsa.pub')
 
 var virtualNetworkName = 'VNET-RKE'
 var virtualNetworkAddress = '10.0.0.0/16'
@@ -29,6 +28,58 @@ var securityRules = [
       sourcePortRange: '*'
       destinationAddressPrefix: '*'
       destinationPortRange: '22'
+    }
+  }
+  {
+    name: 'KUBEAPI'
+    properties: {
+      priority: 200
+      protocol: 'Tcp'
+      access: 'Allow'
+      direction: 'Inbound'
+      sourceAddressPrefix: '*'
+      sourcePortRange: '*'
+      destinationAddressPrefix: '*'
+      destinationPortRange: '6443'
+    }
+  }
+  {
+    name: 'NODEPORT'
+    properties: {
+      priority: 300
+      protocol: 'Tcp'
+      access: 'Allow'
+      direction: 'Inbound'
+      sourceAddressPrefix: '*'
+      sourcePortRange: '*'
+      destinationAddressPrefix: '*'
+      destinationPortRange: '30007'
+    }
+  }
+  {
+    name: 'INGRESS-HTTP'
+    properties: {
+      priority: 400
+      protocol: 'Tcp'
+      access: 'Allow'
+      direction: 'Inbound'
+      sourceAddressPrefix: '*'
+      sourcePortRange: '*'
+      destinationAddressPrefix: '*'
+      destinationPortRange: '80'
+    }
+  }
+  {
+    name: 'INGRESS-HTTPS'
+    properties: {
+      priority: 500
+      protocol: 'Tcp'
+      access: 'Allow'
+      direction: 'Inbound'
+      sourceAddressPrefix: '*'
+      sourcePortRange: '*'
+      destinationAddressPrefix: '*'
+      destinationPortRange: '443'
     }
   }
 ]
@@ -77,7 +128,7 @@ module masterNode './compute/node.bicep' = {
     nodes: masterNodes
     cloudInit: cloudInit
     adminUsername: adminUsername
-    adminPassword: adminPassword
+    sshKey: sshKey
   }
   dependsOn: [network]
 }
@@ -89,7 +140,7 @@ module workerNode './compute/node.bicep' = {
     nodes: workerNodes
     cloudInit: cloudInit
     adminUsername: adminUsername
-    adminPassword: adminPassword
+    sshKey: sshKey
   }
   dependsOn: [network]
 }

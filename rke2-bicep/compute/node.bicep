@@ -4,21 +4,20 @@ param nodes array
 @description('Location for all resources.')
 param location string
 
-@description('CloudInit Script.')
-param cloudInit string
-
 @description('Admin username.')
 param adminUsername string
 
-@description('Node password.')
-@secure()
-param adminPassword string
+@description('Node ssh key.')
+param sshKey string
 
 resource pip 'Microsoft.Network/publicIPAddresses@2021-02-01' = [for node in nodes: {
   name: 'PIP-${node.name}'
   location: location
   sku: {
-    name: 'Basic'
+    name: 'Standard'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Static'
   }
 }]
 
@@ -75,9 +74,18 @@ resource node 'Microsoft.Compute/virtualMachines@2021-11-01' = [for (node, index
     osProfile: {
       computerName: node.name
       adminUsername: adminUsername
-      adminPassword: adminPassword
-      customData: cloudInit
-      // linuxConfiguration: ((authenticationType == 'password') ? null : linuxConfiguration)
+      adminPassword: sshKey
+      linuxConfiguration: {
+        disablePasswordAuthentication: true
+        ssh: {
+          publicKeys: [
+            {
+              path: '/home/${adminUsername}/.ssh/authorized_keys'
+              keyData: sshKey
+            }
+          ]
+        }
+      }
     }
   }
 }]
