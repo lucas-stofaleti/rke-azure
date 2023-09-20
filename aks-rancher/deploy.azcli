@@ -1,0 +1,15 @@
+# Create Resource Group
+az group create --name RG-AKS --location eastus2
+
+# Create AKS Cluster
+az aks create \
+  --resource-group RG-AKS \
+  --name rancher-server \
+  --kubernetes-version 1.27 \
+  --node-count 3 \
+  --node-vm-size Standard_B2s \
+  --generate-ssh-keys
+
+# Get Access Credentials
+az aks get-credentials --resource-group RG-AKS --name rancher-server
+
