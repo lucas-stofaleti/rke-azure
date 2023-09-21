@@ -1,15 +1,64 @@
+# Define Variables
+RG=RG-AKS
+LOCATION=eastus2
+AKS=rancher-server
+VERSION=1.26
+VM_SIZE=Standard_B2s
+NODE_COUNT=3
+INGRESS_VERSION=4.7.2
+RANCHER_VERSION=2.7.6
+CERT_MANAGER_VERSION=v1.13.0
+HOSTNAME=20.22.6.24.sslip.io
+
 # Create Resource Group
-az group create --name RG-AKS --location eastus2
+az group create --name $RG --location $LOCATION
 
 # Create AKS Cluster
 az aks create \
-  --resource-group RG-AKS \
-  --name rancher-server \
-  --kubernetes-version 1.27 \
-  --node-count 3 \
-  --node-vm-size Standard_B2s \
+  --resource-group $RG \
+  --name $AKS \
+  --kubernetes-version $VERSION \
+  --node-count $NODE_COUNT \
+  --node-vm-size $VM_SIZE \
   --generate-ssh-keys
 
 # Get Access Credentials
-az aks get-credentials --resource-group RG-AKS --name rancher-server
+az aks get-credentials --resource-group $RG --name $AKS
 
+# Install NGINX Ingress
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+helm upgrade --install \
+  ingress-nginx ingress-nginx/ingress-nginx \
+  --namespace ingress-nginx \
+  --set controller.service.type=LoadBalancer \
+  --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path"=/healthz \
+  --set controller.service.externalTrafficPolicy=Local \
+  --version $INGRESS_VERSION \
+  --create-namespace
+
+# Add Rancher helm repo
+helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
+
+# Create Namespace for Rancher
+kubectl create namespace cattle-system
+
+# Install Cert Manager
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.crds.yaml
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+helm install cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --version $CERT_MANAGER_VERSION
+
+# Install Rancher
+helm install rancher rancher-stable/rancher \
+  --namespace cattle-system \
+  --set hostname=$HOSTNAME \
+  --set bootstrapPassword= \
+  --version $RANCHER_VERSION \
+  --set ingress.ingressClassName=nginx
+
+# Destroy Lab
+az group delete --name $RG
