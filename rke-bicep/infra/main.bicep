@@ -1,8 +1,12 @@
+targetScope='subscription'
+
+param resourceGroupName string = 'RG-RKE'
+
 @description('Location for all resources.')
-param location string = resourceGroup().location
+param location string = 'eastus2'
 
 @description('Node ssh key.')
-param sshKey string = loadTextContent('../../../.ssh/id_rsa.pub')
+param sshKey string = loadTextContent('../../../../.ssh/id_rsa.pub')
 
 var virtualNetworkName = 'VNET-RKE'
 var virtualNetworkAddress = '10.0.0.0/16'
@@ -91,6 +95,18 @@ var masterNodes = [
     vnetName: 'VNET-RKE'
     subnetName: 'SUB-MASTER'
   }
+  {
+    name: 'MASTER02'
+    privateIP: '10.0.0.6'
+    vnetName: 'VNET-RKE'
+    subnetName: 'SUB-MASTER'
+  }
+  {
+    name: 'MASTER03'
+    privateIP: '10.0.0.7'
+    vnetName: 'VNET-RKE'
+    subnetName: 'SUB-MASTER'
+  }
 ]
 var workerNodes = [
   {
@@ -105,9 +121,20 @@ var workerNodes = [
     vnetName: 'VNET-RKE'
     subnetName: 'SUB-WORKER'
   }
+  // {
+  //   name: 'WORKER03'
+  //   privateIP: '10.0.1.7'
+  //   vnetName: 'VNET-RKE'
+  //   subnetName: 'SUB-WORKER'
+  // }
 ]
 var cloudInit = base64(loadTextContent('./scripts/cloudinit.yaml'))
 var adminUsername = 'lucas'
+
+resource rg 'Microsoft.Resources/resourceGroups@2021-01-01' = {
+  name: resourceGroupName
+  location: location
+}
 
 module network './network/vnet.bicep' = {
   name: 'network'
@@ -119,6 +146,7 @@ module network './network/vnet.bicep' = {
     securityRules: securityRules
     nsgName: nsgName
   }
+  scope: rg
 }
 
 module masterNode './compute/node.bicep' = {
@@ -131,6 +159,7 @@ module masterNode './compute/node.bicep' = {
     sshKey: sshKey
   }
   dependsOn: [network]
+  scope: rg
 }
 
 module workerNode './compute/node.bicep' = {
@@ -143,4 +172,5 @@ module workerNode './compute/node.bicep' = {
     sshKey: sshKey
   }
   dependsOn: [network]
+  scope: rg
 }

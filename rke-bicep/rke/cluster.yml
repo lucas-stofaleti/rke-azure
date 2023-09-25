@@ -1,13 +1,14 @@
 # If you intended to deploy Kubernetes in an air-gapped environment,
 # please consult the documentation on how to configure custom RKE images.
 nodes:
-- address: 20.12.39.193
+- address: 20.114.206.156
   port: "22"
   internal_address: 10.0.0.5
   role:
   - controlplane
+  - worker
   - etcd
-  hostname_override: control-plane
+  hostname_override: master1
   user: lucas
   docker_socket: /var/run/docker.sock
   ssh_key: ""
@@ -16,12 +17,46 @@ nodes:
   ssh_cert_path: ""
   labels: {}
   taints: []
-- address: 20.12.39.198
+- address: 20.114.134.64
+  port: "22"
+  internal_address: 10.0.0.6
+  role:
+  - controlplane
+  # - worker
+  - etcd
+  hostname_override: master2
+  user: lucas
+  docker_socket: /var/run/docker.sock
+  ssh_key: ""
+  ssh_key_path: ~/.ssh/id_rsa
+  ssh_cert: ""
+  ssh_cert_path: ""
+  labels: {}
+  taints: []
+- address: 20.122.80.245
+  port: "22"
+  internal_address: 10.0.0.7
+  role:
+  - controlplane
+  # - worker
+  - etcd
+  hostname_override: master3
+  user: lucas
+  docker_socket: /var/run/docker.sock
+  ssh_key: ""
+  ssh_key_path: ~/.ssh/id_rsa
+  ssh_cert: ""
+  ssh_cert_path: ""
+  labels: {}
+  taints: []
+- address: 172.177.42.22
   port: "22"
   internal_address: 10.0.1.5
   role:
+  # - controlplane
   - worker
-  hostname_override: worker01
+  # - etcd
+  hostname_override: worker1
   user: lucas
   docker_socket: /var/run/docker.sock
   ssh_key: ""
@@ -30,12 +65,14 @@ nodes:
   ssh_cert_path: ""
   labels: {}
   taints: []
-- address: 20.12.39.232
+- address: 20.242.17.26
   port: "22"
   internal_address: 10.0.1.6
   role:
+  # - controlplane
   - worker
-  hostname_override: worker02
+  # - etcd
+  hostname_override: worker2
   user: lucas
   docker_socket: /var/run/docker.sock
   ssh_key: ""
@@ -65,7 +102,10 @@ services:
     snapshot: null
     retention: ""
     creation: ""
-    backup_config: null
+    backup_config:
+      enabled: true
+      interval_hours: 12
+      retention: 6
   kube-api:
     image: ""
     extra_args: {}
@@ -133,7 +173,12 @@ services:
     win_extra_binds: []
     win_extra_env: []
 network:
-  plugin: none
+  plugin: canal
+  options: {}
+  mtu: 0
+  node_selector: {}
+  update_strategy: null
+  tolerations: []
 authentication:
   strategy: x509
   sans: []
