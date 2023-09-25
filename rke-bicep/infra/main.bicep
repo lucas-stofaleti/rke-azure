@@ -6,7 +6,7 @@ param resourceGroupName string = 'RG-RKE'
 param location string = 'eastus2'
 
 @description('Node ssh key.')
-param sshKey string = loadTextContent('../../../../.ssh/id_rsa.pub')
+param sshKey string = loadTextContent('../../../../../../.ssh/id_rsa.pub')
 
 var virtualNetworkName = 'VNET-RKE'
 var virtualNetworkAddress = '10.0.0.0/16'
@@ -109,18 +109,18 @@ var masterNodes = [
   }
 ]
 var workerNodes = [
-  {
-    name: 'WORKER01'
-    privateIP: '10.0.1.5'
-    vnetName: 'VNET-RKE'
-    subnetName: 'SUB-WORKER'
-  }
-  {
-    name: 'WORKER02'
-    privateIP: '10.0.1.6'
-    vnetName: 'VNET-RKE'
-    subnetName: 'SUB-WORKER'
-  }
+  // {
+  //   name: 'WORKER01'
+  //   privateIP: '10.0.1.5'
+  //   vnetName: 'VNET-RKE'
+  //   subnetName: 'SUB-WORKER'
+  // }
+  // {
+  //   name: 'WORKER02'
+  //   privateIP: '10.0.1.6'
+  //   vnetName: 'VNET-RKE'
+  //   subnetName: 'SUB-WORKER'
+  // }
   // {
   //   name: 'WORKER03'
   //   privateIP: '10.0.1.7'

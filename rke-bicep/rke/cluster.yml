@@ -1,7 +1,7 @@
 # If you intended to deploy Kubernetes in an air-gapped environment,
 # please consult the documentation on how to configure custom RKE images.
 nodes:
-- address: 20.114.206.156
+- address: 20.10.206.167
   port: "22"
   internal_address: 10.0.0.5
   role:
@@ -17,12 +17,12 @@ nodes:
   ssh_cert_path: ""
   labels: {}
   taints: []
-- address: 20.114.134.64
+- address: 20.10.205.201
   port: "22"
   internal_address: 10.0.0.6
   role:
   - controlplane
-  # - worker
+  - worker
   - etcd
   hostname_override: master2
   user: lucas
@@ -33,46 +33,14 @@ nodes:
   ssh_cert_path: ""
   labels: {}
   taints: []
-- address: 20.122.80.245
+- address: 20.10.207.194
   port: "22"
   internal_address: 10.0.0.7
   role:
   - controlplane
-  # - worker
+  - worker
   - etcd
   hostname_override: master3
-  user: lucas
-  docker_socket: /var/run/docker.sock
-  ssh_key: ""
-  ssh_key_path: ~/.ssh/id_rsa
-  ssh_cert: ""
-  ssh_cert_path: ""
-  labels: {}
-  taints: []
-- address: 172.177.42.22
-  port: "22"
-  internal_address: 10.0.1.5
-  role:
-  # - controlplane
-  - worker
-  # - etcd
-  hostname_override: worker1
-  user: lucas
-  docker_socket: /var/run/docker.sock
-  ssh_key: ""
-  ssh_key_path: ~/.ssh/id_rsa
-  ssh_cert: ""
-  ssh_cert_path: ""
-  labels: {}
-  taints: []
-- address: 20.242.17.26
-  port: "22"
-  internal_address: 10.0.1.6
-  role:
-  # - controlplane
-  - worker
-  # - etcd
-  hostname_override: worker2
   user: lucas
   docker_socket: /var/run/docker.sock
   ssh_key: ""
